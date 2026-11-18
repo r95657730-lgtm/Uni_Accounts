@@ -1,13 +1,26 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Pattern BUILDER  : StudentAccount.Builder construit le compte (champs obligatoires + optionnels).
- * Pattern PROTOTYPE: StudentAccount implemente Cloneable; clone() copie un modele, withIdentity() change l'identite.
+ * UniAccounts - TP1 : compte d'un etudiant.
+ *
+ * @author Aicha Diab
+ * @author Radhia Bahri
+ *
+ * Patterns utilises dans cette classe :
+ *  - Builder   : StudentAccount.Builder (classe interne) construit le compte pas a pas.
+ *  - Prototype : StudentAccount implemente Cloneable ; clone() copie un modele,
+ *                withIdentity() change seulement l'identite de la copie.
  */
+// Prototype : StudentAccount est le ConcretePrototype (il sait se cloner)
 public class StudentAccount implements Cloneable {
+
+    // Niveaux autorises
+    private static final List<String> LEVELS = Arrays.asList("L1", "L2", "L3", "L4", "M1", "M2");
 
     // Champs obligatoires
     private String id;
@@ -17,7 +30,7 @@ public class StudentAccount implements Cloneable {
     // Champs optionnels
     private String phone;          // defaut : null
     private String level;          // defaut : "L1"
-    private String major;
+    private String major;          // defaut : null
     private boolean scholarship;   // defaut : false
     private List<String> courses;  // defaut : liste vide
 
@@ -41,10 +54,20 @@ public class StudentAccount implements Cloneable {
     public String getLevel() { return level; }
     public String getMajor() { return major; }
     public boolean hasScholarship() { return scholarship; }
-    public List<String> getCourses() { return new ArrayList<>(courses); }
 
-    // ---------- PROTOTYPE ----------
-    // Role : ConcretePrototype. Copie profonde (la liste des cours est dupliquee).
+    // Copie en lecture seule : l'exterieur ne peut pas modifier la liste interne
+    public List<String> getCourses() { return Collections.unmodifiableList(courses); }
+
+    // Inscrire l'etudiant a un nouveau module
+    public void enroll(String course) {
+        if (course == null || course.trim().isEmpty())
+            throw new IllegalArgumentException("Nom de module vide");
+        courses.add(course.trim());
+    }
+
+    // ---------- Prototype ----------
+    // Prototype : clone() = copie PROFONDE (la liste des modules est dupliquee,
+    // sinon la copie et le modele partageraient la meme liste).
     @Override
     public StudentAccount clone() {
         try {
@@ -52,16 +75,18 @@ public class StudentAccount implements Cloneable {
             copy.courses = new ArrayList<>(this.courses);
             return copy;
         } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
+            throw new AssertionError(e);   // impossible : la classe est Cloneable
         }
     }
 
-    // Change uniquement l'identite de la copie (id, nom, email) et valide les regles
+    // Prototype : change uniquement l'identite de la copie (id, nom, email),
+    // avec les memes regles de validation que le Builder.
+    // A appeler sur une copie : modele.clone().withIdentity(...)
     public StudentAccount withIdentity(String id, String fullName, String email) {
         Builder.validate(id, fullName, email);
-        this.id = id;
-        this.fullName = fullName;
-        this.email = email;
+        this.id = id.trim();
+        this.fullName = fullName.trim();
+        this.email = email.trim();
         return this;
     }
 
@@ -78,8 +103,9 @@ public class StudentAccount implements Cloneable {
     }
 
     // =====================================================
-    // BUILDER
-    // Role : Builder (classe interne statique).
+    // Builder : classe interne statique qui construit le compte.
+    // Champs obligatoires dans le constructeur du Builder,
+    // champs optionnels par methodes chainees (valeurs par defaut).
     // =====================================================
     public static class Builder {
         // obligatoires
@@ -95,11 +121,12 @@ public class StudentAccount implements Cloneable {
 
         public Builder(String id, String fullName, String email) {
             validate(id, fullName, email);
-            this.id = id;
-            this.fullName = fullName;
-            this.email = email;
+            this.id = id.trim();
+            this.fullName = fullName.trim();
+            this.email = email.trim();
         }
 
+        // Regles : id non vide, nom non vide, email contenant @
         static void validate(String id, String fullName, String email) {
             if (id == null || id.trim().isEmpty())
                 throw new IllegalArgumentException("L'id ne doit pas etre vide");
@@ -112,9 +139,8 @@ public class StudentAccount implements Cloneable {
         public Builder phone(String phone) { this.phone = phone; return this; }
 
         public Builder level(String level) {
-            List<String> valid = java.util.Arrays.asList("L1", "L2", "L3", "M1", "M2");
-            if (!valid.contains(level))
-                throw new IllegalArgumentException("Niveau invalide : " + level);
+            if (!LEVELS.contains(level))
+                throw new IllegalArgumentException("Niveau invalide (L1, L2, L3, L4, M1, M2) : " + level);
             this.level = level;
             return this;
         }
