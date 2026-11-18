@@ -23,35 +23,31 @@ public class Main {
 
         // ---------- 2) BUILDER ----------
         System.out.println("\n--- Builder ---");
-        StudentAccount minimal = new StudentAccount.Builder("2024001", "Radhia Bahri", "radhia.bahri@univ.dz").build();
+        StudentAccount minimal = new StudentAccount.Builder("202439405009", "Radhia Bahri", "r95657730@gmail.com").build();
         System.out.println(minimal);
 
-        StudentAccount full = new StudentAccount.Builder("2024002", "Aicha Diab", "aicha.diab@univ.dz")
-                .phone("0555123456").level("L2").major("Informatique")
-                .scholarship(true).addCourse("POO").addCourse("BDD").build();
+        StudentAccount full = new StudentAccount.Builder("202439429612", "Aicha Diab", "aicha.lat@gmail.com")
+                .level("L4").major("Informatique").addCourse("POO").addCourse("BDD").build();
         System.out.println(full);
 
         try {
-            new StudentAccount.Builder("2024003", "Test", "email-sans-arobase").build();
+            new StudentAccount.Builder("202439429612", "Aicha Diab", "email-sans-arobase").build();
         } catch (IllegalArgumentException e) {
             System.out.println("Erreur attendue : " + e.getMessage());
         }
         try {
-            new StudentAccount.Builder("2024004", "Test", "test@univ.dz").level("L9").build();
+            new StudentAccount.Builder("202439429612", "Aicha Diab", "aicha.lat@gmail.com").level("L9").build();
         } catch (IllegalArgumentException e) {
             System.out.println("Erreur attendue : " + e.getMessage());
         }
-
-        repo.add(minimal);
-        repo.add(full);
 
         // ---------- 3) PROTOTYPE ----------
         System.out.println("\n--- Prototype ---");
         StudentAccount template = new StudentAccount.Builder("TEMPLATE", "Modele", "modele@univ.dz")
-                .level("L2").major("Informatique").addCourse("SE1").addCourse("POO").addCourse("Reseaux").build();
+                .level("L4").major("Informatique").addCourse("POO").addCourse("BDD").build();
 
-        StudentAccount s1 = template.clone().withIdentity("2024010", "Sara Mansouri", "sara@univ.dz");
-        StudentAccount s2 = template.clone().withIdentity("2024011", "Yacine Hadj", "yacine@univ.dz");
+        StudentAccount s1 = template.clone().withIdentity("202439429612", "Aicha Diab", "aicha.lat@gmail.com");
+        StudentAccount s2 = template.clone().withIdentity("202439405009", "Radhia Bahri", "r95657730@gmail.com");
         repo.add(s1);
         repo.add(s2);
         System.out.println(s1);
@@ -68,7 +64,7 @@ public class Main {
         // ---------- Doublon ----------
         System.out.println("\n--- Test doublon ---");
         try {
-            repo.add(template.clone().withIdentity("2024010", "Doublon", "d@univ.dz"));
+            repo.add(template.clone().withIdentity("202439429612", "Aicha Diab", "aicha.lat@gmail.com"));
         } catch (IllegalArgumentException e) {
             System.out.println("Erreur attendue : " + e.getMessage());
         }
